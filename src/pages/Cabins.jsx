@@ -6,10 +6,9 @@ import CabinTable from "../features/cabins/CabinTable";
 import CreateCabinForm from "../features/cabins/CreateCabinForm";
 import { useState } from "react";
 import Button from "../ui/Button";
+import AddCabin from "../features/cabins/AddCabin";
 
 export default function Cabins() {
-  const [showAddCabinForm, setShowAddCabinForm] = useState(false);
-
   //use to manage remote state react query
   // useEffect(() => {
   //   async function fetchCabinData() {
@@ -27,13 +26,7 @@ export default function Cabins() {
 
       <Row>
         <CabinTable />
-        <Button
-          onClick={() => setShowAddCabinForm(!showAddCabinForm)}
-          variation="primary"
-        >
-          Add new cabin
-        </Button>
-        {showAddCabinForm && <CreateCabinForm />}
+        <AddCabin />
       </Row>
     </>
   );

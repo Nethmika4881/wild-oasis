@@ -11,6 +11,7 @@ export default function UpdateSettingsForm() {
   const updateSettingMutation = useUpdateSettings();
   const isUpdatingSetting = updateSettingMutation.isPending;
   const handleUpdate = (field, newValue, currentValue) => {
+    if (!newValue) return;
     const numValue = Number(newValue);
 
     // Don't update if value hasn't changed

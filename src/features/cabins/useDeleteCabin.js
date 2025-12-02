@@ -12,6 +12,7 @@ export function useDeleteCabin() {
       // console.log("✅ Cabin Successfully deleted:", cabinID);
       // 🔄 Refetch all cabins to update UI
       // queryClient.invalidateQueries(["cabins"]);
+      //after success set currect data to invalid and refetch
       queryClient.invalidateQueries({
         queryKey: ["cabins"],
       });

@@ -8,6 +8,8 @@ import { Trash } from "lucide-react";
 import { Copy } from "lucide-react";
 import { Pencil } from "lucide-react";
 import useAddCabin from "./useAddCabin";
+import Modal from "../../ui/Modal";
+import ConfirmDelete from "../../ui/ConfirmDelete";
 const TableRow = styled.div`
   display: grid;
   grid-template-columns: 0.6fr 1.8fr 2.2fr 1fr 1fr 1fr;
@@ -48,6 +50,8 @@ const Discount = styled.div`
 `;
 
 function CabinRow({ cabin }) {
+  const [isOpenModal, setIsOpenModal] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
   const [showEditForm, setShowEditForm] = useState(false);
   const deleteCabinMutation = useDeleteCabin();
   const isDeleting = deleteCabinMutation.isPending;
@@ -64,8 +68,18 @@ function CabinRow({ cabin }) {
     name,
   } = cabin;
   // console.log(cabin);
-
+  const handleModal = function () {
+    setIsOpenModal((show) => !show);
+  };
   const handleDelete = function () {
+    // const confirm = window.confirm(
+    //   `Are you sure you want to delete "${name}"?`
+    // );
+
+    // if (confirm) {
+    //   deleteCabinMutation.mutate(cabinID);
+    // }
+    setShowConfirm((c) => !c);
     deleteCabinMutation.mutate(cabinID);
   };
   const handleDuplicate = function () {
@@ -97,7 +111,7 @@ function CabinRow({ cabin }) {
           </Button>
           <Button
             size="small"
-            onClick={() => setShowEditForm((show) => !show)}
+            onClick={() => setIsOpenModal((show) => !show)}
             disabled={isDeleting}
           >
             <Pencil />
@@ -113,7 +127,12 @@ function CabinRow({ cabin }) {
         </div>
       </TableRow>
 
-      {showEditForm && <CreateCabinForm cabinToEdit={cabin} />}
+      {/* {showEditForm && <CreateCabinForm cabinToEdit={cabin} />} */}
+      {isOpenModal && (
+        <Modal handleModal={handleModal}>
+          <CreateCabinForm handleModal={handleModal} cabinToEdit={cabin} />
+        </Modal>
+      )}
     </>
   );
 }

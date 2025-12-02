@@ -1,3 +1,6 @@
+import { X } from "lucide-react";
+import { cloneElement, createContext, useContext, useState } from "react";
+import { createPortal } from "react-dom";
 import styled from "styled-components";
 
 const StyledModal = styled.div`
@@ -48,3 +51,60 @@ const Button = styled.button`
     color: var(--color-grey-500);
   }
 `;
+
+const ModalContext = createContext();
+
+const Modal = function ({ children }) {
+  const [openModalWindowName, setOpenModalWindowName] = useState("");
+  const openThisModal = setOpenModalWindowName;
+  const close = () => setOpenModalWindowName("");
+  return (
+    <ModalContext.Provider
+      value={{ openModalWindowName, openThisModal, close }}
+    >
+      {children}
+    </ModalContext.Provider>
+  );
+};
+
+const Open = function ({ children, name }) {
+  const { openThisModal } = useContext(ModalContext);
+
+  return cloneElement(children, { onClick: () => openThisModal(name) });
+};
+// function Modal({ children, handleModal }) {
+//   return createPortal(
+//     <Overlay onClick={handleModal}>
+//       <StyledModal onClick={(e) => e.stopPropagation()}>
+//         <div>{children}</div>
+//         <Button onClick={handleModal}>
+//           <X />
+//         </Button>
+//       </StyledModal>
+//     </Overlay>,
+//     document.body
+//   );
+// }
+
+// export default Modal;
+
+function Window({ children, name }) {
+  const { openModalWindowName, close } = useContext(ModalContext);
+
+  if (name !== openModalWindowName) return null;
+  return createPortal(
+    <Overlay onClick={close}>
+      <StyledModal>
+        <div>{children}</div>
+        <Button onClick={close}>
+          <X />
+        </Button>
+      </StyledModal>
+    </Overlay>,
+    document.body
+  );
+}
+
+Modal.Open = Open;
+Modal.Window = Window;
+export default Modal;

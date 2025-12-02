@@ -9,7 +9,7 @@ import FormRow from "./../../ui/FormRow";
 import useEditCabin from "./useEditCabin";
 import useAddCabin from "./useAddCabin";
 
-function CreateCabinForm({ cabinToEdit = {} }) {
+function CreateCabinForm({ cabinToEdit = {}, handleModal }) {
   const { id: editID, ...editValues } = cabinToEdit;
   const isAEditSession = Object.keys(cabinToEdit).length > 0;
 
@@ -57,7 +57,15 @@ function CreateCabinForm({ cabinToEdit = {} }) {
       );
     } else {
       // For creating - image is required
-      createMutation.mutate({ ...data, image: imageFile });
+      createMutation.mutate(
+        { ...data, image: imageFile },
+        {
+          onSuccess: () => {
+            reset();
+            handleModal?.();
+          },
+        }
+      );
     }
   };
 
@@ -66,7 +74,10 @@ function CreateCabinForm({ cabinToEdit = {} }) {
   };
 
   return (
-    <Form onSubmit={handleSubmit(onSubmit, onError)}>
+    <Form
+      onSubmit={handleSubmit(onSubmit, onError)}
+      type={handleModal ? "modal" : "regular"}
+    >
       <FormRow label="name" error={errors?.name?.message}>
         <Input
           type="text"
@@ -146,7 +157,11 @@ function CreateCabinForm({ cabinToEdit = {} }) {
       </FormRow>
 
       <FormRow>
-        <Button variation="secondary" type="reset">
+        <Button
+          variation="secondary"
+          type="button"
+          onClick={() => handleModal?.()}
+        >
           Cancel
         </Button>
         <Button type="submit" disabled={isWorking} variation="primary">
