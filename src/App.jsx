@@ -17,6 +17,9 @@ import AppLayout from "./ui/AppLayout";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { Toaster } from "react-hot-toast";
+import Booking from "./pages/Booking";
+import Checkin from "./pages/checkin";
+import ProtectedRoute from "./ui/ProtectedRoute";
 
 // const StyledApp = styled.div`
 //   background-color: white;
@@ -58,7 +61,11 @@ const queryClient = new QueryClient({
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <AppLayout />,
+    element: (
+      <ProtectedRoute>
+        <AppLayout />
+      </ProtectedRoute>
+    ),
     children: [
       {
         index: true,
@@ -68,9 +75,19 @@ const router = createBrowserRouter([
         path: "dashboard",
         element: <Dashboard />,
       },
+
       {
         path: "bookings",
         element: <Bookings />,
+      },
+
+      {
+        path: `bookings/:id`,
+        element: <Booking />,
+      },
+      {
+        path: `checkin/:id`,
+        element: <Checkin />,
       },
       {
         path: "cabins",

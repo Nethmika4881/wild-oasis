@@ -6,6 +6,18 @@ import Table from "../../ui/Table";
 
 import { formatCurrency } from "../../utils/helpers";
 import { formatDistanceFromNow } from "../../utils/helpers";
+import Menus from "../../ui/Menus";
+import {
+  ArrowDownLeftSquareIcon,
+  ArrowDownSquare,
+  ArrowUpSquare,
+  Eye,
+  EyeIcon,
+  Trash,
+} from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import useCheckoutMutation from "./useCheckoutMutation";
+import useBookingDeleteMutation from "./useBookingDeleteMutation";
 
 const Cabin = styled.div`
   font-size: 1.6rem;
@@ -48,12 +60,26 @@ function BookingRow({
     cabins: { name: cabinName },
   },
 }) {
+  const checkoutMutation = useCheckoutMutation();
+  const isCheckoutUnderProcess = checkoutMutation.isPending;
+  const deleteMutation = useBookingDeleteMutation();
+
   const statusToTagName = {
     unconfirmed: "blue",
     "checked-in": "green",
     "checked-out": "silver",
   };
 
+  const navigate = useNavigate();
+  function handleCheckout(bookingId) {
+    checkoutMutation.mutate({
+      obj: { status: "checked-out" },
+      id: Number(bookingId),
+    });
+  }
+  function handleDelete(bookingId) {
+    deleteMutation.mutate(bookingId);
+  }
   return (
     <Table.Row>
       <Cabin>{cabinName}</Cabin>
@@ -79,6 +105,45 @@ function BookingRow({
       <Tag type={statusToTagName[status]}>{status.replace("-", " ")}</Tag>
 
       <Amount>{formatCurrency(totalPrice)}</Amount>
+      <Menus.Menu>
+        <Menus.Toogle id={bookingId} />
+        <Menus.List id={bookingId}>
+          <Menus.Button
+            icon={<Eye />}
+            onClick={() => navigate(`/bookings/${bookingId}`)}
+          >
+            See Details
+          </Menus.Button>
+          {status === "unconfirmed" && (
+            <Menus.Button
+              icon={<ArrowDownSquare />}
+              onClick={() => navigate(`/checkin/${bookingId}`)}
+            >
+              Checkin
+            </Menus.Button>
+          )}
+          {status === "unconfirmed" && (
+            <Menus.Button
+              icon={<Trash />}
+              variation="danger"
+              onClick={() => handleDelete(bookingId)}
+            >
+              Delete
+            </Menus.Button>
+          )}
+          {status === "checked-in" && (
+            <Menus.Button
+              icon={<ArrowUpSquare />}
+              disabled={isCheckoutUnderProcess}
+              onClick={() => {
+                handleCheckout(bookingId);
+              }}
+            >
+              check out
+            </Menus.Button>
+          )}
+        </Menus.List>
+      </Menus.Menu>
     </Table.Row>
   );
 }

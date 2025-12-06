@@ -1,16 +1,19 @@
 import styled from "styled-components";
 import { format, isToday } from "date-fns";
-import {
-  HiOutlineChatBubbleBottomCenterText,
-  HiOutlineCheckCircle,
-  HiOutlineCurrencyDollar,
-  HiOutlineHomeModern,
-} from "react-icons/hi2";
 
 import DataItem from "../../ui/DataItem";
 import { Flag } from "../../ui/Flag";
 
 import { formatDistanceFromNow, formatCurrency } from "../../utils/helpers";
+import {
+  ChartArea,
+  Check,
+  CheckCircle,
+  CheckCircle2,
+  DollarSign,
+  Eye,
+  Home,
+} from "lucide-react";
 
 const StyledBookingDataBox = styled.section`
   /* Box */
@@ -103,12 +106,13 @@ const Footer = styled.footer`
 
 // A purely presentational component
 function BookingDataBox({ booking }) {
+  console.log(booking, "booking");
   const {
     created_at,
     startDate,
     endDate,
-    numNights,
-    numGuests,
+    numOfNights,
+    numOfGuests,
     cabinPrice,
     extrasPrice,
     totalPrice,
@@ -123,9 +127,9 @@ function BookingDataBox({ booking }) {
     <StyledBookingDataBox>
       <Header>
         <div>
-          <HiOutlineHomeModern />
+          <Home />
           <p>
-            {numNights} nights in Cabin <span>{cabinName}</span>
+            {numOfNights} nights in Cabin <span>{cabinName}</span>
           </p>
         </div>
 
@@ -142,7 +146,7 @@ function BookingDataBox({ booking }) {
         <Guest>
           {countryFlag && <Flag src={countryFlag} alt={`Flag of ${country}`} />}
           <p>
-            {guestName} {numGuests > 1 ? `+ ${numGuests - 1} guests` : ""}
+            {guestName} {numOfGuests > 1 ? `+ ${numOfGuests - 1} guests` : ""}
           </p>
           <span>&bull;</span>
           <p>{email}</p>
@@ -151,20 +155,17 @@ function BookingDataBox({ booking }) {
         </Guest>
 
         {observations && (
-          <DataItem
-            icon={<HiOutlineChatBubbleBottomCenterText />}
-            label="Observations"
-          >
+          <DataItem icon={<Eye />} label="Observations">
             {observations}
           </DataItem>
         )}
 
-        <DataItem icon={<HiOutlineCheckCircle />} label="Breakfast included?">
+        <DataItem icon={<CheckCircle2 />} label="Breakfast included?">
           {hasBreakfast ? "Yes" : "No"}
         </DataItem>
 
         <Price isPaid={isPaid}>
-          <DataItem icon={<HiOutlineCurrencyDollar />} label={`Total price`}>
+          <DataItem icon={<DollarSign />} label={`Total price`}>
             {formatCurrency(totalPrice)}
 
             {hasBreakfast &&

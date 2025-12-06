@@ -2,13 +2,17 @@ import styled from "styled-components";
 import CabinRow from "./CabinRow";
 import Spinner from "../../ui/Spinner";
 import useGetCabins from "./useGetCabins";
-const Table = styled.div`
-  border: 1px solid var(--color-grey-200);
-  font-size: 1.4rem;
-  background-color: var(--color-grey-0);
-  border-radius: 7px;
-  overflow: hidden;
-`;
+import Table from "../../ui/Table";
+import Menus from "../../ui/Menus";
+import { useSearchParams } from "react-router-dom";
+import { orderBy } from "lodash";
+// const Table = styled.div`
+//   border: 1px solid var(--color-grey-200);
+//   font-size: 1.4rem;
+//   background-color: var(--color-grey-0);
+//   border-radius: 7px;
+//   overflow: hidden;
+// `;
 
 const TableHeader = styled.header`
   display: grid;
@@ -26,24 +30,66 @@ const TableHeader = styled.header`
 `;
 function CabinTable() {
   const { cabins, error, isLoading, isError } = useGetCabins();
+  const [searchParams] = useSearchParams();
   if (isError) return <p>Error : {error.message}</p>;
   if (isLoading) return <Spinner />;
 
-  return (
-    <Table role="table">
-      <TableHeader role="table">
-        <div></div>
-        <div>Cabin</div>
-        <div>Capacity</div>
-        <div>Price</div>
-        <div>Discount</div>
-        <div></div>
-      </TableHeader>
+  //1)Filter
+  console.log(cabins, "canins");
+  const filterValue = searchParams.get("discount") || "all";
 
-      {cabins.map((cabin) => (
-        <CabinRow cabin={cabin} key={cabin.id} />
-      ))}
-    </Table>
+  let filteredCabins;
+
+  if (filterValue === "all") filteredCabins = cabins;
+  if (filterValue === "with-discount") {
+    filteredCabins = cabins.filter((cabin) => cabin.discount > 0);
+  }
+  if (filterValue === "no-discount") {
+    filteredCabins = cabins.filter((cabin) => cabin.discount === 0);
+  }
+
+  //2)SORT BY
+
+  let sortedCabins = filteredCabins;
+
+  const sortByWhat = searchParams.get("sort-by") || "name-asc";
+  const [field, direction] = sortByWhat.split("-");
+  sortedCabins = orderBy(sortedCabins, [field], [direction]);
+  // if (sortByWhat === "name-asc")
+  //   sortedCabins = orderBy(sortedCabins, ["name"], ["asc"]);
+
+  // if (sortByWhat === "name-desc")
+  //   sortedCabins = orderBy(sortedCabins, ["name"], ["desc"]);
+
+  // if (sortByWhat === "regularPrice-asc")
+  //   sortedCabins = orderBy(sortedCabins, ["regularPrice"], ["asc"]);
+
+  // if (sortByWhat === "regularPrice-desc")
+  //   sortedCabins = orderBy(sortedCabins, ["regularPrice"], ["desc"]);
+
+  // if (sortByWhat === "maxCapacity-asc")
+  //   sortedCabins = orderBy(sortedCabins, ["maxCapacity"], ["asc"]);
+
+  // if (sortByWhat === "maxCapacity-desc")
+  //   sortedCabins = orderBy(sortedCabins, ["maxCapacity"], ["desc"]);
+
+  return (
+    <Menus>
+      <Table columns="0.6fr 1.8fr 2.2fr 1fr 1fr .5fr">
+        <Table.Header>
+          <div></div>
+          <div>Cabin</div>
+          <div>Capacity</div>
+          <div>Price</div>
+          <div>Discount</div>
+          <div></div>
+        </Table.Header>
+        <Table.Body
+          data={sortedCabins}
+          render={(cabin) => <CabinRow cabin={cabin} key={cabin.id} />}
+        ></Table.Body>
+      </Table>
+    </Menus>
   );
 }
 

@@ -1,3 +1,6 @@
+import { Dot, EllipsisVertical } from "lucide-react";
+import { createContext, useContext, useState } from "react";
+import { createPortal } from "react-dom";
 import styled from "styled-components";
 
 const StyledMenu = styled.div`
@@ -60,3 +63,77 @@ const StyledButton = styled.button`
     transition: all 0.3s;
   }
 `;
+
+const MenusContext = createContext();
+
+const Menus = function ({ children }) {
+  const [openID, setOpenID] = useState("");
+  const [position, setPosition] = useState(null);
+  const close = () => setOpenID("");
+  const Open = setOpenID;
+  return (
+    <MenusContext.Provider
+      value={{ openID, Open, close, position, setPosition }}
+    >
+      {children}
+    </MenusContext.Provider>
+  );
+};
+
+const Toogle = function ({ id }) {
+  const { Open, openID, close, setPosition } = useContext(MenusContext);
+
+  const handleClick = function (e) {
+    const rect = e.target.closest("button").getBoundingClientRect();
+    console.log(rect);
+    setPosition({
+      x: window.innerWidth - rect.width - rect.x,
+      y: rect.y + rect.height + 8,
+    });
+    //when clicked on the same button twice
+    if (id === openID) {
+      close();
+    }
+
+    if (id !== openID || openID === "") {
+      Open(id);
+    }
+  };
+  return (
+    <StyledToggle onClick={handleClick}>
+      <EllipsisVertical />
+    </StyledToggle>
+  );
+};
+
+const List = function ({ id, children }) {
+  const { openID, position } = useContext(MenusContext);
+
+  if (id !== openID) {
+    return null;
+  }
+
+  return createPortal(
+    <StyledList position={position}>{children}</StyledList>,
+    document.body
+  );
+};
+const Button = function ({ children, onClick, icon, disabled = false }) {
+  return (
+    <li>
+      <StyledButton onClick={() => onClick?.()} disabled={disabled}>
+        {icon} <span>{children}</span>
+      </StyledButton>
+    </li>
+  );
+};
+
+const Menu = function ({ children }) {
+  return <StyledMenu>{children}</StyledMenu>;
+};
+Menus.Toogle = Toogle;
+Menus.Menu = Menu;
+Menus.List = List;
+Menus.Button = Button;
+
+export default Menus;

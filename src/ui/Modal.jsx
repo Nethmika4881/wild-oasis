@@ -1,7 +1,15 @@
 import { X } from "lucide-react";
-import { cloneElement, createContext, useContext, useState } from "react";
+import {
+  cloneElement,
+  createContext,
+  useContext,
+  // useEffect,
+  // useRef,
+  useState,
+} from "react";
 import { createPortal } from "react-dom";
 import styled from "styled-components";
+import { useOutsideClick } from "../hooks/useOutsideClick";
 
 const StyledModal = styled.div`
   position: fixed;
@@ -90,15 +98,16 @@ const Open = function ({ children, name }) {
 
 function Window({ children, name }) {
   const { openModalWindowName, close } = useContext(ModalContext);
-
+  const ref = useOutsideClick(close);
+  //in the begining name is  set to the prop comes in such as "cabin-form" or something.but still openModalWindowName is still "" since we havent clicked on the button.so no need to anything to be open
   if (name !== openModalWindowName) return null;
   return createPortal(
-    <Overlay onClick={close}>
-      <StyledModal>
-        <div>{children}</div>
+    <Overlay>
+      <StyledModal ref={ref}>
         <Button onClick={close}>
           <X />
         </Button>
+        <div>{cloneElement(children, { handleModal: close })}</div>
       </StyledModal>
     </Overlay>,
     document.body

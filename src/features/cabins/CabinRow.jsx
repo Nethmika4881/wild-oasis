@@ -1,15 +1,17 @@
 import styled from "styled-components";
 import { formatCurrency } from "../../utils/helpers";
 import Button from "../../ui/Button";
-import { useState } from "react";
+// import { useState } from "react";
 import CreateCabinForm from "./CreateCabinForm";
 import { useDeleteCabin } from "./useDeleteCabin";
-import { Trash } from "lucide-react";
+import { Menu, Trash } from "lucide-react";
 import { Copy } from "lucide-react";
 import { Pencil } from "lucide-react";
 import useAddCabin from "./useAddCabin";
 import Modal from "../../ui/Modal";
 import ConfirmDelete from "../../ui/ConfirmDelete";
+import Table from "../../ui/Table";
+import Menus from "../../ui/Menus";
 const TableRow = styled.div`
   display: grid;
   grid-template-columns: 0.6fr 1.8fr 2.2fr 1fr 1fr 1fr;
@@ -50,9 +52,9 @@ const Discount = styled.div`
 `;
 
 function CabinRow({ cabin }) {
-  const [isOpenModal, setIsOpenModal] = useState(false);
-  const [showConfirm, setShowConfirm] = useState(false);
-  const [showEditForm, setShowEditForm] = useState(false);
+  // const [isOpenModal, setIsOpenModal] = useState(false);
+  // const [showConfirm, setShowConfirm] = useState(false);
+  // const [showEditForm, setShowEditForm] = useState(false);
   const deleteCabinMutation = useDeleteCabin();
   const isDeleting = deleteCabinMutation.isPending;
 
@@ -68,9 +70,9 @@ function CabinRow({ cabin }) {
     name,
   } = cabin;
   // console.log(cabin);
-  const handleModal = function () {
-    setIsOpenModal((show) => !show);
-  };
+  // const handleModal = function () {
+  //   setIsOpenModal((show) => !show);
+  // };
   const handleDelete = function () {
     // const confirm = window.confirm(
     //   `Are you sure you want to delete "${name}"?`
@@ -79,7 +81,7 @@ function CabinRow({ cabin }) {
     // if (confirm) {
     //   deleteCabinMutation.mutate(cabinID);
     // }
-    setShowConfirm((c) => !c);
+    // setShowConfirm((c) => !c);
     deleteCabinMutation.mutate(cabinID);
   };
   const handleDuplicate = function () {
@@ -95,44 +97,54 @@ function CabinRow({ cabin }) {
 
   return (
     <>
-      <TableRow role="row">
+      <Table.Row role="row">
         <Img src={image} />
         <Cabin>{name}</Cabin>
         <div>Fits up to {maxCapacity} guests</div>
         <Price>{formatCurrency(regularPrice)}</Price>
         <Discount>{discount ? discount : "_"}</Discount>
         <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
-          <Button
-            size="small"
-            onClick={handleDuplicate}
-            disabled={isDuplicating}
-          >
-            <Copy />
-          </Button>
-          <Button
-            size="small"
-            onClick={() => setIsOpenModal((show) => !show)}
-            disabled={isDeleting}
-          >
-            <Pencil />
-          </Button>
-          <Button
-            size="small"
-            onClick={handleDelete}
-            disabled={isDeleting}
-            variation="primary"
-          >
-            <Trash />
-          </Button>
+          <Modal>
+            <Menus.Menu>
+              <Menus.Toogle id={cabinID} />
+              <Menus.List id={cabinID}>
+                <Menus.Button
+                  icon={<Copy />}
+                  disabled={isDuplicating}
+                  onClick={handleDuplicate}
+                >
+                  Duplicate
+                </Menus.Button>
+                <Modal.Open name="cabin-edit">
+                  <Menus.Button icon={<Pencil />}>Edit</Menus.Button>
+                </Modal.Open>
+                <Modal.Open name="cabin-delete">
+                  <Menus.Button icon={<Trash />}>Delete</Menus.Button>
+                </Modal.Open>
+              </Menus.List>
+
+              <Modal.Window name="cabin-edit">
+                <CreateCabinForm cabinToEdit={cabin} />
+              </Modal.Window>
+
+              <Modal.Window name="cabin-delete">
+                <ConfirmDelete
+                  resourceName={name}
+                  disabled={isDeleting}
+                  onConfirm={handleDelete}
+                />
+              </Modal.Window>
+            </Menus.Menu>
+          </Modal>
         </div>
-      </TableRow>
+      </Table.Row>
 
       {/* {showEditForm && <CreateCabinForm cabinToEdit={cabin} />} */}
-      {isOpenModal && (
+      {/* {isOpenModal && (
         <Modal handleModal={handleModal}>
           <CreateCabinForm handleModal={handleModal} cabinToEdit={cabin} />
         </Modal>
-      )}
+      )} */}
     </>
   );
 }
