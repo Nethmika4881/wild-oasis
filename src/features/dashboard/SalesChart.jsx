@@ -75,7 +75,6 @@ function SalesChart({ bookings, numDays }) {
     end: new Date(),
   });
 
-  console.log(allDays);
   const { isDarkMode } = useDarkMode();
   const data = allDays.map((date) => {
     return {

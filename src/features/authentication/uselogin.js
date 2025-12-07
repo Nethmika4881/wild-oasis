@@ -9,7 +9,6 @@ export function useLogin() {
   const loginMutation = useMutation({
     mutationFn: ({ email, password }) => login({ email, password }),
     onSuccess: (data) => {
-      console.log(data, "data");
       queryClient.setQueryData(["user", data.user]);
       navigate("/dashboard", { replace: true }); //go to dashboard without keeping this login page in the browse history,user cant go back to this page
     },

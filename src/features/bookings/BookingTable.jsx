@@ -11,8 +11,7 @@ function BookingTable() {
 
   if (isLoading) return <Spinner />;
   if (!isLoading && isError) return <p>Error : {error.message}</p>;
-  console.log(bookings, "bo");
-  console.log(count);
+
   if (bookings.length === 0) return <Empty resource="bookings" />;
   return (
     <Menus>

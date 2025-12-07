@@ -14,7 +14,6 @@ function SignupForm() {
   const signupMutation = useSignup();
   const isSignupUnderProccess = signupMutation.isPending;
   function onSubmitForm(data) {
-    console.log(data);
     signupMutation.mutate(
       {
         email: data.email,

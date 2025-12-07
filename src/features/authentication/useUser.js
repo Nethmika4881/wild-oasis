@@ -7,8 +7,6 @@ export function useUser() {
     queryKey: ["user"],
   });
 
-  console.log("user user", user);
-
   return {
     isLoading,
     user,
