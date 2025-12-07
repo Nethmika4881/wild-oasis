@@ -1,5 +1,17 @@
 import styled from "styled-components";
 import DashboardBox from "./DashboardBox";
+import Heading from "../../ui/Heading";
+import {
+  Area,
+  AreaChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
+import { useDarkMode } from "../../context/DarkModeContext";
+import { eachDayOfInterval, format, isSameDay, subDays } from "date-fns";
 
 const StyledSalesChart = styled(DashboardBox)`
   grid-column: 1 / -1;
@@ -40,20 +52,99 @@ const fakeData = [
   { label: "Feb 03", totalSales: 1400, extrasSales: 450 },
   { label: "Feb 04", totalSales: 1500, extrasSales: 500 },
   { label: "Feb 05", totalSales: 1400, extrasSales: 600 },
-  { label: "Feb 06", totalSales: 1450, extrasSales: 400 },
+  { label: "Feb 06", totalSales: 1000, extrasSales: 400 },
 ];
 
-const isDarkMode = true;
-const colors = isDarkMode
-  ? {
-      totalSales: { stroke: "#4f46e5", fill: "#4f46e5" },
-      extrasSales: { stroke: "#22c55e", fill: "#22c55e" },
-      text: "#e5e7eb",
-      background: "#18212f",
-    }
-  : {
-      totalSales: { stroke: "#4f46e5", fill: "#c7d2fe" },
-      extrasSales: { stroke: "#16a34a", fill: "#dcfce7" },
-      text: "#374151",
-      background: "#fff",
+// const isDarkMode = true;
+// const colors = isDarkMode
+//   ? {
+//       totalSales: { stroke: "#4f46e5", fill: "#4f46e5" },
+//       extrasSales: { stroke: "#22c55e", fill: "#22c55e" },
+//       text: "#e5e7eb",
+//       background: "#18212f",
+//     }
+//   : {
+//       totalSales: { stroke: "#4f46e5", fill: "#c7d2fe" },
+//       extrasSales: { stroke: "#16a34a", fill: "#dcfce7" },
+//       text: "#374151",
+//       background: "#fff",
+//     };
+function SalesChart({ bookings, numDays }) {
+  const allDays = eachDayOfInterval({
+    start: subDays(new Date(), numDays - 1),
+    end: new Date(),
+  });
+
+  console.log(allDays);
+  const { isDarkMode } = useDarkMode();
+  const data = allDays.map((date) => {
+    return {
+      label: format(date, "MMM dd"),
+      totalSales: bookings
+        .filter((booking) => isSameDay(date, new Date(booking.created_at)))
+        .reduce((acc, curr) => acc + curr.totalPrice, 0),
+
+      extrasSales: bookings
+        .filter((booking) => isSameDay(date, new Date(booking.created_at)))
+        .reduce((acc, curr) => acc + curr.extrasPrice, 0),
     };
+  });
+  const colors = isDarkMode
+    ? {
+        totalSales: { stroke: "#4f46e5", fill: "#4f46e5" },
+        extrasSales: { stroke: "#22c55e", fill: "#22c55e" },
+        text: "#e5e7eb",
+        background: "#18212f",
+      }
+    : {
+        totalSales: { stroke: "#4f46e5", fill: "#c7d2fe" },
+        extrasSales: { stroke: "#16a34a", fill: "#dcfce7" },
+        text: "#374151",
+        background: "#fff",
+      };
+  return (
+    <StyledSalesChart>
+      <Heading as="h2">
+        Sales from {format(allDays.at(0), "MMM dd yyyy")} &mdash;{" "}
+        {format(allDays.at(-1), "MMM dd yyyy")}
+      </Heading>
+      <ResponsiveContainer width="100%" height={300}>
+        <AreaChart data={data}>
+          <XAxis
+            dataKey="label"
+            tick={{ fill: colors.text }}
+            tickLine={{ stroke: colors.text }}
+          />
+
+          <YAxis
+            unit="$"
+            tick={{ fill: colors.text }}
+            tickLine={{ stroke: colors.text }}
+          />
+          <CartesianGrid strokeDasharray="3" />
+          <Area
+            dataKey="extrasSales"
+            type="monotone"
+            stroke={colors.extrasSales.stroke}
+            fill={colors.extrasSales.fill}
+            strokeWidth={2}
+            name="Extra sales"
+            unit="$"
+          />
+          <Area
+            dataKey="totalSales"
+            type="monotone"
+            stroke={colors.totalSales.stroke}
+            fill={colors.totalSales.fill}
+            strokeWidth={2}
+            name="Total sales"
+            unit="$"
+          />
+          <Tooltip contentStyle={{ backgroundColor: colors.background }} />
+        </AreaChart>
+      </ResponsiveContainer>
+    </StyledSalesChart>
+  );
+}
+
+export default SalesChart;

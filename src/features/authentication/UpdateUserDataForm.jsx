@@ -7,23 +7,41 @@ import FormRow from "../../ui/FormRow";
 import Input from "../../ui/Input";
 
 import { useUser } from "./useUser";
+import useUpdateUser from "./userUpdateUser";
 
 function UpdateUserDataForm() {
   // We don't need the loading state, and can immediately use the user data, because we know that it has already been loaded at this point
   const {
     user: {
-      email,
-      user_metadata: { fullName: currentFullName },
+      user: {
+        email,
+        user_metadata: { fullName: currentFullName },
+      },
     },
   } = useUser();
 
+  const userDetailsEditMutation = useUpdateUser();
   const [fullName, setFullName] = useState(currentFullName);
   const [avatar, setAvatar] = useState(null);
 
   function handleSubmit(e) {
     e.preventDefault();
+    if (!fullName) return;
+    userDetailsEditMutation.mutate(
+      { fullName, avatar },
+      {
+        onSuccess: () => {
+          setAvatar("");
+          e.target.reset();
+        },
+      }
+    );
   }
 
+  const handleCancel = function () {
+    setFullName(currentFullName);
+    setAvatar(null);
+  };
   return (
     <Form onSubmit={handleSubmit}>
       <FormRow label="Email address">
@@ -45,10 +63,12 @@ function UpdateUserDataForm() {
         />
       </FormRow>
       <FormRow>
-        <Button type="reset" variation="secondary">
+        <Button type="reset" variation="secondary" onClick={handleCancel}>
           Cancel
         </Button>
-        <Button>Update account</Button>
+        <Button disabled={userDetailsEditMutation.isPending}>
+          Update account
+        </Button>
       </FormRow>
     </Form>
   );
